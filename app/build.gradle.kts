@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "pl.mmarkowebuty.admin"
-    compileSdk = 37
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "pl.mmarkowebuty.admin"
