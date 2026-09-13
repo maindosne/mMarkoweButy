@@ -11,11 +11,16 @@ android {
         applicationId = "pl.mmarkowebuty.admin"
         minSdk = 28
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "1.2.0"
     }
 
     buildTypes {
+        debug {
+            // APK z GitHub Actions pozostaje łatwy do instalacji, ale aplikacja
+            // administracyjna nie wystawia interfejsu debuggera na urządzeniu.
+            isDebuggable = false
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
