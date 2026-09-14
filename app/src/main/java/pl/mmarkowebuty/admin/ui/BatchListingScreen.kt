@@ -156,7 +156,7 @@ fun BatchListingScreen(vm: MainViewModel, onBack: () -> Unit) {
                                 value = brand,
                                 onValueChange = {},
                                 modifier = Modifier
-                                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                    .menuAnchor()
                                     .fillMaxWidth(),
                                 readOnly = true,
                                 enabled = !state.running,
