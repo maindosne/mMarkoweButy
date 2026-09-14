@@ -31,4 +31,13 @@ object ManufacturerProfiles {
 
     fun find(brand: String): ManufacturerProfile? =
         all.firstOrNull { it.brand.equals(brand.trim(), ignoreCase = true) }
+
+    fun findInFolderName(folderName: String): ManufacturerProfile? {
+        return all.firstOrNull { profile ->
+            Regex(
+                pattern = "(^|[^\\p{L}\\p{N}])${Regex.escape(profile.brand)}([^\\p{L}\\p{N}]|$)",
+                option = RegexOption.IGNORE_CASE,
+            ).containsMatchIn(folderName)
+        }
+    }
 }
