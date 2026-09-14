@@ -78,7 +78,17 @@ fun BatchListingScreen(vm: MainViewModel, onBack: () -> Unit) {
             runCatching {
                 context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-            scope.launch { runCatching { controller.scan(uri) } }
+            scope.launch {
+                runCatching { controller.scan(uri) }.onSuccess {
+                    val detectedProfiles = controller.state.value.items
+                        .filter { it.stage == BatchStage.READY }
+                        .mapNotNull { ManufacturerProfiles.findInFolderName(it.folderName) }
+                        .distinctBy { it.brand.lowercase() }
+                    if (detectedProfiles.size == 1) {
+                        applyManufacturerProfile(detectedProfiles.first())
+                    }
+                }
+            }
         }
     }
 
@@ -115,7 +125,7 @@ fun BatchListingScreen(vm: MainViewModel, onBack: () -> Unit) {
                             Text("Jak przygotować foldery", fontWeight = FontWeight.Bold)
                         }
                         Text(
-                            "W folderze głównym umieść osobny podfolder dla każdej pary. Nazwa przykładowa: r.39_dl.wkl. 25,3 cm_65zl. W środku mogą być zdjęcia JPG, PNG, WEBP, HEIC lub HEIF.",
+                            "W folderze głównym umieść osobny podfolder dla każdej pary. Przykład: cabin r.40_dl.wkl.25,8cm_39zl. Jeśli nazwa zaczyna się od Cabin, ChunSen albo Koka, aplikacja rozpozna markę i uzupełni zapisane dane producenta.",
                             color = MmMuted,
                             style = MaterialTheme.typography.bodySmall
                         )
@@ -143,7 +153,7 @@ fun BatchListingScreen(vm: MainViewModel, onBack: () -> Unit) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
                         Text("Profil prawny tej partii", fontWeight = FontWeight.Bold)
                         Text(
-                            "Wybierz markę, a zapisane dane producenta zostaną uzupełnione automatycznie. Pola nadal można ręcznie poprawić przed wystawieniem.",
+                            "Marka z nazwy folderu jest wykrywana automatycznie. Możesz też wybrać ją ręcznie lub poprawić dane przed wystawieniem.",
                             color = MmMuted,
                             style = MaterialTheme.typography.bodySmall
                         )
@@ -203,17 +213,22 @@ fun BatchListingScreen(vm: MainViewModel, onBack: () -> Unit) {
                             )
                         }
 
-                        val legalReady = manufacturerName.isNotBlank() && manufacturerAddress.isNotBlank() && manufacturerEmail.isNotBlank()
+                        val canProcess = manufacturerName.isNotBlank() && manufacturerAddress.isNotBlank()
+                        val publishReady = canProcess && manufacturerEmail.isNotBlank()
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                if (legalReady) Icons.Outlined.CheckCircle else Icons.Outlined.WarningAmber,
+                                if (publishReady) Icons.Outlined.CheckCircle else Icons.Outlined.WarningAmber,
                                 null,
-                                tint = if (legalReady) MmGreen else MmOrange
+                                tint = if (publishReady) MmGreen else MmOrange
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(
-                                if (legalReady) "Dane producenta gotowe." else "Do automatycznej publikacji potrzebne są prawdziwe dane producenta.",
-                                color = if (legalReady) MmGreen else MmMuted,
+                                when {
+                                    publishReady -> "Dane producenta gotowe — AUTO może od razu opublikować ofertę."
+                                    canProcess -> "AUTO może przetworzyć zdjęcia. Z powodu brakującego e-maila producenta oferta zostanie zapisana jako ukryta do uzupełnienia."
+                                    else -> "Do przetwarzania potrzebna jest potwierdzona nazwa i adres producenta."
+                                },
+                                color = if (publishReady) MmGreen else MmMuted,
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
@@ -231,10 +246,10 @@ fun BatchListingScreen(vm: MainViewModel, onBack: () -> Unit) {
 
             if (state.items.isNotEmpty()) {
                 item {
-                    val legalReady = manufacturerName.isNotBlank() && manufacturerAddress.isNotBlank() && manufacturerEmail.isNotBlank()
+                    val canProcess = manufacturerName.isNotBlank() && manufacturerAddress.isNotBlank()
                     Button(
                         onClick = { syncLegal(); scope.launch { controller.processAll() } },
-                        enabled = !state.running && legalReady && state.items.any { it.stage == BatchStage.READY || it.stage == BatchStage.ERROR },
+                        enabled = !state.running && canProcess && state.items.any { it.stage == BatchStage.READY || it.stage == BatchStage.ERROR },
                         modifier = Modifier.fillMaxWidth().height(58.dp)
                     ) {
                         if (state.running) {
