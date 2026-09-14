@@ -34,6 +34,7 @@ fun BatchListingScreen(vm: MainViewModel, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
 
     var brand by rememberSaveable { mutableStateOf("Bez marki") }
+    var brandMenuExpanded by remember { mutableStateOf(false) }
     var manufacturerName by rememberSaveable { mutableStateOf("") }
     var manufacturerAddress by rememberSaveable { mutableStateOf("") }
     var manufacturerEmail by rememberSaveable { mutableStateOf("") }
@@ -55,6 +56,21 @@ fun BatchListingScreen(vm: MainViewModel, onBack: () -> Unit) {
                 safetyInfo = safetyInfo.trim(),
             )
         )
+    }
+
+    fun applyManufacturerProfile(profile: ManufacturerProfile?) {
+        if (profile == null) {
+            brand = "Bez marki"
+            manufacturerName = ""
+            manufacturerAddress = ""
+            manufacturerEmail = ""
+        } else {
+            brand = profile.brand
+            manufacturerName = profile.manufacturerName
+            manufacturerAddress = profile.manufacturerAddress
+            manufacturerEmail = profile.manufacturerEmail
+        }
+        syncLegal()
     }
 
     val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
@@ -127,11 +143,49 @@ fun BatchListingScreen(vm: MainViewModel, onBack: () -> Unit) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
                         Text("Profil prawny tej partii", fontWeight = FontWeight.Bold)
                         Text(
-                            "Te dane są kopiowane do wystawianych ofert. Nie rozpoznajemy ich ze zdjęcia i nie zgadujemy. Jeśli w jednym folderze głównym masz różnych producentów, przetwarzaj ich jako osobne partie.",
+                            "Wybierz markę, a zapisane dane producenta zostaną uzupełnione automatycznie. Pola nadal można ręcznie poprawić przed wystawieniem.",
                             color = MmMuted,
                             style = MaterialTheme.typography.bodySmall
                         )
-                        BatchField("Marka / nazwa handlowa", brand) { brand = it; syncLegal() }
+
+                        ExposedDropdownMenuBox(
+                            expanded = brandMenuExpanded,
+                            onExpandedChange = { if (!state.running) brandMenuExpanded = !brandMenuExpanded }
+                        ) {
+                            OutlinedTextField(
+                                value = brand,
+                                onValueChange = {},
+                                modifier = Modifier
+                                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                    .fillMaxWidth(),
+                                readOnly = true,
+                                enabled = !state.running,
+                                label = { Text("Marka") },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = brandMenuExpanded) }
+                            )
+                            ExposedDropdownMenu(
+                                expanded = brandMenuExpanded,
+                                onDismissRequest = { brandMenuExpanded = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Bez marki") },
+                                    onClick = {
+                                        brandMenuExpanded = false
+                                        applyManufacturerProfile(null)
+                                    }
+                                )
+                                ManufacturerProfiles.all.forEach { profile ->
+                                    DropdownMenuItem(
+                                        text = { Text(profile.brand) },
+                                        onClick = {
+                                            brandMenuExpanded = false
+                                            applyManufacturerProfile(profile)
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
                         BatchField("Producent – nazwa", manufacturerName) { manufacturerName = it; syncLegal() }
                         BatchField("Producent – adres", manufacturerAddress, singleLine = false) { manufacturerAddress = it; syncLegal() }
                         BatchField("Producent – e-mail", manufacturerEmail) { manufacturerEmail = it; syncLegal() }
@@ -139,6 +193,15 @@ fun BatchListingScreen(vm: MainViewModel, onBack: () -> Unit) {
                         BatchField("Osoba odpowiedzialna w UE – adres", responsibleAddress, singleLine = false) { responsibleAddress = it; syncLegal() }
                         BatchField("Osoba odpowiedzialna w UE – e-mail", responsibleEmail) { responsibleEmail = it; syncLegal() }
                         BatchField("Informacje / ostrzeżenia bezpieczeństwa (tylko jeśli znane)", safetyInfo, singleLine = false) { safetyInfo = it; syncLegal() }
+
+                        val selectedProfile = ManufacturerProfiles.find(brand)
+                        if (selectedProfile != null && (selectedProfile.manufacturerAddress.isBlank() || selectedProfile.manufacturerEmail.isBlank())) {
+                            Text(
+                                "Dla marki ${selectedProfile.brand} część danych kontaktowych producenta nie jest jeszcze potwierdzona. Nie uzupełniamy ich na podstawie domysłów.",
+                                color = MmOrange,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
 
                         val legalReady = manufacturerName.isNotBlank() && manufacturerAddress.isNotBlank() && manufacturerEmail.isNotBlank()
                         Row(verticalAlignment = Alignment.CenterVertically) {
