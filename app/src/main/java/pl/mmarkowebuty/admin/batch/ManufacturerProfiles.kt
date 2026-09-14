@@ -27,6 +27,12 @@ object ManufacturerProfiles {
             manufacturerAddress = "",
             manufacturerEmail = "",
         ),
+        ManufacturerProfile(
+            brand = "SuperIn",
+            manufacturerName = "Lam Ng Chung",
+            manufacturerAddress = "Symfonická 1426/5, 150 00 Praha 5 – Stodůlky, Czechy",
+            manufacturerEmail = "",
+        ),
     )
 
     fun find(brand: String): ManufacturerProfile? =
