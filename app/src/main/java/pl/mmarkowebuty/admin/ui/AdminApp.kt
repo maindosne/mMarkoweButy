@@ -31,6 +31,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import kotlinx.coroutines.delay
 import pl.mmarkowebuty.admin.MainViewModel
+import pl.mmarkowebuty.admin.batch.ManufacturerProfiles
 import pl.mmarkowebuty.admin.data.*
 import java.text.NumberFormat
 import java.time.Instant
@@ -339,6 +340,7 @@ private fun ProductCard(product: Product, onClick: () -> Unit) {
 @Composable
 private fun ProductEditorScreen(vm: MainViewModel, product: Product?, onDone: () -> Unit) {
     var brand by remember(product?.id) { mutableStateOf(product?.brand ?: "") }
+    var brandMenuExpanded by remember(product?.id) { mutableStateOf(false) }
     var name by remember(product?.id) { mutableStateOf(product?.name ?: "") }
     var description by remember(product?.id) { mutableStateOf(product?.description ?: "") }
     var size by remember(product?.id) { mutableStateOf(product?.sizes?.firstOrNull() ?: "") }
@@ -375,7 +377,37 @@ private fun ProductEditorScreen(vm: MainViewModel, product: Product?, onDone: ()
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         if (sold) WarningCard("Ta oferta jest sprzedana. Dla bezpieczeństwa historii sprzedaży aplikacja nie pozwala jej edytować ani usuwać.")
         Text("Podstawowe dane", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        AppField("Marka", brand, { brand = it }, enabled = !sold)
+        ExposedDropdownMenuBox(
+    expanded = brandMenuExpanded,
+    onExpandedChange = { if (!sold) brandMenuExpanded = !brandMenuExpanded }
+) {
+    OutlinedTextField(
+        value = brand,
+        onValueChange = { brand = it },
+        modifier = Modifier.menuAnchor().fillMaxWidth(),
+        enabled = !sold,
+        singleLine = true,
+        label = { Text("Marka") },
+        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = brandMenuExpanded) }
+    )
+    ExposedDropdownMenu(
+        expanded = brandMenuExpanded,
+        onDismissRequest = { brandMenuExpanded = false }
+    ) {
+        ManufacturerProfiles.all.forEach { profile ->
+            DropdownMenuItem(
+                text = { Text(profile.brand) },
+                onClick = {
+                    brandMenuExpanded = false
+                    brand = profile.brand
+                    manufacturerName = profile.manufacturerName
+                    manufacturerAddress = profile.manufacturerAddress
+                    manufacturerEmail = profile.manufacturerEmail
+                }
+            )
+        }
+    }
+}
         AppField("Nazwa produktu", name, { name = it }, enabled = !sold)
         AppField("Opis", description, { description = it }, enabled = !sold, singleLine = false, minLines = 3)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
