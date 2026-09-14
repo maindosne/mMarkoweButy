@@ -80,8 +80,8 @@ class BatchController(
     suspend fun processAll() {
         val start = _state.value
         if (start.running) return
-        if (!start.legalProfile.isReady()) {
-            _state.value = start.copy(overallMessage = "Uzupełnij prawdziwe dane producenta dla tej partii. Aplikacja nie będzie ich zgadywać.")
+        if (!start.legalProfile.canProcess()) {
+            _state.value = start.copy(overallMessage = "Brakuje potwierdzonej nazwy lub adresu producenta. Uzupełnij dane producenta przed przetwarzaniem.")
             return
         }
         val token = tokenStore.read() ?: run {
@@ -101,7 +101,7 @@ class BatchController(
             val final = _state.value.items
             _state.value = _state.value.copy(
                 running = false,
-                overallMessage = "Zakończono. Wystawione: ${final.count { it.stage == BatchStage.DONE }}, błędy: ${final.count { it.stage == BatchStage.ERROR }}, pominięte: ${final.count { it.stage == BatchStage.INVALID }}."
+                overallMessage = "Zakończono. Wystawione: ${final.count { it.stage == BatchStage.DONE }}, do uzupełnienia: ${final.count { it.stage == BatchStage.LEGAL_REVIEW }}, błędy: ${final.count { it.stage == BatchStage.ERROR }}, pominięte: ${final.count { it.stage == BatchStage.INVALID }}."
             )
             vm.refreshAll(silent = true)
         } finally {
@@ -151,12 +151,13 @@ class BatchController(
             val insolePl = spec.insoleCm.replace('.', ',')
             val description = "$productName. Rozmiar ${spec.size}, długość wkładki $insolePl cm. Oferta dotyczy jednej konkretnej pary widocznej na zdjęciach."
             val profile = _state.value.legalProfile
+            val publishNow = profile.isReady()
 
             replace(
                 index,
                 current(index).copy(
                     stage = BatchStage.PUBLISHING,
-                    message = "Publikuję ofertę w mMarkoweButy…",
+                    message = if (publishNow) "Publikuję ofertę w mMarkoweButy…" else "Zapisuję ofertę jako ukrytą do uzupełnienia danych GPSR…",
                     detectedCategory = category,
                     detectedColor = color,
                 )
@@ -169,7 +170,7 @@ class BatchController(
                 size = spec.size,
                 price = spec.price,
                 imageUrls = urls,
-                published = true,
+                published = publishNow,
                 manufacturerName = profile.manufacturerName,
                 manufacturerAddress = profile.manufacturerAddress,
                 manufacturerEmail = profile.manufacturerEmail,
@@ -180,19 +181,31 @@ class BatchController(
             )
             val productId = api.createProduct(token, draft)
             val verified = api.products(token).any {
-                it.id == productId && it.published && !it.sold && it.imageUrls.isNotEmpty() && it.sizes.contains(spec.size)
+                it.id == productId && it.published == publishNow && !it.sold && it.imageUrls.isNotEmpty() && it.sizes.contains(spec.size)
             }
             if (!verified) throw ApiException("Oferta została zapisana, ale nie przeszła końcowej weryfikacji.")
 
-            replace(
-                index,
-                current(index).copy(
-                    stage = BatchStage.DONE,
-                    message = "Wystawiono: $productName • ${spec.size} • ${spec.price.replace('.', ',')} zł",
-                    productId = productId,
-                    processed = source.imageUris.size,
+            if (publishNow) {
+                replace(
+                    index,
+                    current(index).copy(
+                        stage = BatchStage.DONE,
+                        message = "Wystawiono: $productName • ${spec.size} • ${spec.price.replace('.', ',')} zł",
+                        productId = productId,
+                        processed = source.imageUris.size,
+                    )
                 )
-            )
+            } else {
+                replace(
+                    index,
+                    current(index).copy(
+                        stage = BatchStage.LEGAL_REVIEW,
+                        message = "Zdjęcia przetworzone i produkt zapisany jako UKRYTY. Uzupełnij e-mail producenta, aby opublikować ofertę.",
+                        productId = productId,
+                        processed = source.imageUris.size,
+                    )
+                )
+            }
         } catch (e: Throwable) {
             replace(index, current(index).copy(stage = BatchStage.ERROR, message = e.message ?: "Nieznany błąd podczas przetwarzania."))
         }
