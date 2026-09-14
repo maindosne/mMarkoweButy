@@ -44,7 +44,8 @@ data class BatchLegalProfile(
     val responsiblePersonEmail: String = "",
     val safetyInfo: String = "",
 ) {
-    fun isReady(): Boolean = manufacturerName.isNotBlank() && manufacturerAddress.isNotBlank() && manufacturerEmail.isNotBlank()
+    fun canProcess(): Boolean = manufacturerName.isNotBlank() && manufacturerAddress.isNotBlank()
+    fun isReady(): Boolean = canProcess() && manufacturerEmail.isNotBlank()
 }
 
 data class BatchUiState(
@@ -66,6 +67,6 @@ object FolderSpecParser {
         val insole = insoleRx.find(name)?.groupValues?.getOrNull(1)?.replace(',', '.') ?: return null
         val price = priceRx.find(name)?.groupValues?.getOrNull(1)?.replace(',', '.') ?: return null
         if (price.toDoubleOrNull() == null || insole.toDoubleOrNull() == null) return null
-        return FolderSpec(size = size.trimEnd('0').trimEnd('.'), insoleCm = insole, price = price)
+        return FolderSpec(size = size, insoleCm = insole, price = price)
     }
 }
