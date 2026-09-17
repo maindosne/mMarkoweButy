@@ -11,14 +11,12 @@ android {
         applicationId = "pl.mmarkowebuty.admin"
         minSdk = 28
         targetSdk = 36
-        versionCode = 5
-        versionName = "1.2.2"
+        versionCode = 6
+        versionName = "1.3.0"
     }
 
     buildTypes {
         debug {
-            // APK z GitHub Actions pozostaje łatwy do instalacji, ale aplikacja
-            // administracyjna nie wystawia interfejsu debuggera na urządzeniu.
             isDebuggable = false
         }
         release {
@@ -67,9 +65,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.2")
 
-    // Darmowe, lokalne rozpoznawanie typu obuwia.
+    // Skanowanie EAN/UPC/QR przez aparat bez budowania własnego podglądu kamery.
+    implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
+
     implementation("com.google.mlkit:image-labeling:17.0.9")
-    // Darmowe wycinanie produktu z tła przez moduł Google Play Services.
     implementation("com.google.android.gms:play-services-mlkit-subject-segmentation:16.0.0-beta1")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
