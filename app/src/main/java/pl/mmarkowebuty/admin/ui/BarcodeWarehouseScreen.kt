@@ -14,9 +14,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.google.android.gms.mlkit.barcode.Barcode
-import com.google.android.gms.mlkit.codescanner.GmsBarcodeScannerOptions
-import com.google.android.gms.mlkit.codescanner.GmsBarcodeScanning
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import pl.mmarkowebuty.admin.MainViewModel
 import pl.mmarkowebuty.admin.data.ProductDraft
 
@@ -70,6 +70,7 @@ fun BarcodeWarehouseScreen(vm: MainViewModel, onBack: () -> Unit) {
                     scanError = null
                     scanner.startScan()
                         .addOnSuccessListener { result -> barcode = result.rawValue.orEmpty() }
+                        .addOnCanceledListener { scanError = null }
                         .addOnFailureListener { scanError = "Nie udało się zeskanować kodu. Spróbuj ponownie." }
                 },
                 modifier = Modifier.fillMaxWidth().height(54.dp),
