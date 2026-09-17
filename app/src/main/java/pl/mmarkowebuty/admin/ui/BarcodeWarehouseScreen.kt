@@ -1,210 +1,125 @@
 package pl.mmarkowebuty.admin.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.QrCodeScanner
+import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.google.mlkit.vision.barcode.common.Barcode
-import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
-import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import pl.mmarkowebuty.admin.MainViewModel
 import pl.mmarkowebuty.admin.data.Product
 import pl.mmarkowebuty.admin.data.ProductDraft
 import java.util.Locale
 
-private fun Product.warehouseDraft(code: String) = ProductDraft(
-    brand = brand,
-    name = name,
-    description = description,
-    size = sizes.firstOrNull().orEmpty(),
-    price = String.format(Locale.US, "%.2f", price),
-    imageUrls = imageUrls,
-    published = false,
-    productIdentifier = code,
-    manufacturerName = manufacturerName,
-    manufacturerAddress = manufacturerAddress,
-    manufacturerEmail = manufacturerEmail,
-    responsiblePersonName = responsiblePersonName,
-    responsiblePersonAddress = responsiblePersonAddress,
-    responsiblePersonEmail = responsiblePersonEmail,
-    safetyInfo = safetyInfo,
-    materialUpper = materialUpper,
-    materialLining = materialLining,
-    materialSole = materialSole,
-)
-
 @Composable
 fun BarcodeWarehouseScreen(vm: MainViewModel, onBack: () -> Unit) {
-    val context = LocalContext.current
-    var barcode by remember { mutableStateOf("") }
+    var selectedProduct by remember { mutableStateOf<Product?>(null) }
+    var addMode by remember { mutableStateOf(false) }
     var brand by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var size by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
-    var scanError by remember { mutableStateOf<String?>(null) }
-    var lastAdded by remember { mutableStateOf<String?>(null) }
-    var matchedProduct by remember { mutableStateOf<Product?>(null) }
-
-    fun fillFromProduct(product: Product) {
-        matchedProduct = product
-        brand = product.brand
-        name = product.name
-        size = product.sizes.firstOrNull().orEmpty()
-        price = String.format(Locale.US, "%.2f", product.price)
-    }
-
-    fun addMatchedProduct(code: String, product: Product) {
-        fillFromProduct(product)
-        scanError = null
-        lastAdded = null
-        vm.saveProduct(null, product.warehouseDraft(code)) {
-            val stock = vm.products.count { it.productIdentifier.trim() == code && !it.sold }
-            lastAdded = "Dodano do magazynu: ${product.brand} ${product.name}, rozmiar ${product.sizes.firstOrNull().orEmpty()}. Stan dla tego kodu: $stock szt."
-        }
-    }
-
-    fun handleCode(raw: String) {
-        val code = raw.trim()
-        barcode = code
-        scanError = null
-        lastAdded = null
-        matchedProduct = null
-        if (code.isBlank()) {
-            scanError = "Skaner nie odczytał kodu."
-            return
-        }
-        val product = vm.products.firstOrNull { it.productIdentifier.trim() == code }
-        if (product != null) {
-            addMatchedProduct(code, product)
-        } else {
-            brand = ""
-            name = ""
-            size = ""
-            price = ""
-            scanError = "Nie znaleziono tego kodu w produktach. Uzupełnij dane tylko za pierwszym razem."
-        }
-    }
-
-    val scanner = remember(context) {
-        val options = GmsBarcodeScannerOptions.Builder()
-            .setBarcodeFormats(
-                Barcode.FORMAT_EAN_13,
-                Barcode.FORMAT_EAN_8,
-                Barcode.FORMAT_UPC_A,
-                Barcode.FORMAT_UPC_E,
-                Barcode.FORMAT_CODE_128,
-                Barcode.FORMAT_CODE_39,
-                Barcode.FORMAT_ITF
-            )
-            .enableAutoZoom()
-            .build()
-        GmsBarcodeScanning.getClient(context, options)
-    }
+    var ean by remember { mutableStateOf("") }
 
     Scaffold(
         containerColor = MmBg,
         topBar = {
             TopAppBar(
-                title = { Text("Skaner magazynu", fontWeight = FontWeight.Bold) },
+                title = { Text(if (addMode) "Dodaj produkt" else "Magazyn", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Outlined.ArrowBack, contentDescription = "Wstecz")
-                    }
+                    IconButton(onClick = {
+                        when {
+                            addMode -> addMode = false
+                            selectedProduct != null -> selectedProduct = null
+                            else -> onBack()
+                        }
+                    }) { Icon(Icons.Outlined.ArrowBack, contentDescription = "Wstecz") }
                 }
             )
         }
     ) { padding ->
-        Column(
-            Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text("Zeskanuj kod raz. Jeżeli EAN jest już przypisany do produktu, aplikacja rozpozna parę, pokaże jej dane i automatycznie doda kolejną fizyczną parę do magazynu.", color = MmMuted)
-
-            Button(
-                onClick = {
-                    scanError = null
-                    scanner.startScan()
-                        .addOnSuccessListener { result -> handleCode(result.rawValue.orEmpty()) }
-                        .addOnCanceledListener { scanError = null }
-                        .addOnFailureListener { scanError = "Nie udało się zeskanować kodu. Spróbuj ponownie." }
-                },
-                modifier = Modifier.fillMaxWidth().height(54.dp),
-                enabled = !vm.busy
+        when {
+            addMode -> Column(
+                Modifier.fillMaxSize().padding(padding).padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Icon(Icons.Outlined.QrCodeScanner, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text(if (vm.busy) "Dodawanie..." else "Skanuj i dodaj do magazynu")
-            }
-
-            OutlinedTextField(
-                value = barcode,
-                onValueChange = { barcode = it.filter(Char::isDigit); matchedProduct = null; lastAdded = null },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("EAN / kod kreskowy") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-
-            lastAdded?.let { Text(it, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold) }
-            scanError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-
-            matchedProduct?.let { product ->
-                Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text("ROZPOZNANO PRODUKT", fontWeight = FontWeight.Bold, color = MmOrange)
-                        Text("But: ${product.brand} ${product.name}", fontWeight = FontWeight.Bold)
-                        Text("Rozmiar: ${product.sizes.firstOrNull().orEmpty()}")
-                        Text("Kolor / opis: ${product.description.ifBlank { "brak zapisanego koloru/opisu" }}")
-                        Text("EAN: ${product.productIdentifier}")
-                        Text("Cena: ${String.format(Locale.US, "%.2f", product.price)} zł")
-                    }
-                }
-            }
-
-            if (matchedProduct == null) {
+                Text("Dodaj nowy produkt do magazynu. Kod EAN możesz wpisać teraz albo przypisać później.", color = MmMuted)
                 OutlinedTextField(brand, { brand = it }, Modifier.fillMaxWidth(), label = { Text("Marka") }, singleLine = true)
                 OutlinedTextField(name, { name = it }, Modifier.fillMaxWidth(), label = { Text("Nazwa produktu") }, singleLine = true)
                 OutlinedTextField(size, { size = it }, Modifier.fillMaxWidth(), label = { Text("Rozmiar") }, singleLine = true)
-                OutlinedTextField(
-                    price,
-                    { price = it },
-                    Modifier.fillMaxWidth(),
-                    label = { Text("Cena (zł)") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                )
-
+                OutlinedTextField(price, { price = it }, Modifier.fillMaxWidth(), label = { Text("Cena (zł)") }, singleLine = true)
+                OutlinedTextField(ean, { ean = it.filter(Char::isDigit) }, Modifier.fillMaxWidth(), label = { Text("EAN / kod kreskowy (opcjonalnie)") }, singleLine = true)
                 Button(
                     onClick = {
-                        val draft = ProductDraft(
-                            brand = brand,
-                            name = name,
-                            size = size,
-                            price = price,
-                            published = false,
-                            productIdentifier = barcode
-                        )
-                        val savedCode = barcode
-                        vm.saveProduct(null, draft) {
-                            val stock = vm.products.count { it.productIdentifier.trim() == savedCode && !it.sold }
-                            lastAdded = "Nowy kod zapisany w magazynie. Stan: $stock szt."
-                            vm.products.firstOrNull { it.productIdentifier.trim() == savedCode }?.let(::fillFromProduct)
+                        vm.saveProduct(null, ProductDraft(brand = brand, name = name, size = size, price = price, published = false, productIdentifier = ean)) {
+                            brand = ""; name = ""; size = ""; price = ""; ean = ""; addMode = false
                         }
                     },
                     modifier = Modifier.fillMaxWidth().height(54.dp),
-                    enabled = !vm.busy && barcode.isNotBlank() && brand.isNotBlank() && name.isNotBlank() && size.isNotBlank() && price.replace(',', '.').toDoubleOrNull() != null
+                    enabled = !vm.busy && brand.isNotBlank() && name.isNotBlank() && size.isNotBlank() && price.replace(',', '.').toDoubleOrNull() != null
+                ) { Text("DODAJ PRODUKT") }
+            }
+
+            selectedProduct != null -> {
+                val p = selectedProduct!!
+                Column(
+                    Modifier.fillMaxSize().padding(padding).padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Text("ZAPISZ NOWY KOD W MAGAZYNIE")
+                    Text("${p.brand} ${p.name}", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                    Text("Rozmiar: ${p.sizes.joinToString().ifBlank { "—" }}")
+                    Text("EAN: ${p.productIdentifier.ifBlank { "nie przypisano" }}")
+                    Text("Cena: ${String.format(Locale.US, "%.2f", p.price)} zł")
+                    Text(if (p.published) "Status: aktywny w sklepie" else "Status: w magazynie / ukryty", color = MmMuted)
+                }
+            }
+
+            else -> Column(Modifier.fillMaxSize().padding(padding)) {
+                Button(
+                    onClick = { addMode = true },
+                    modifier = Modifier.fillMaxWidth().padding(16.dp).height(56.dp)
+                ) {
+                    Icon(Icons.Outlined.Add, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("DODAJ PRODUKT")
+                }
+
+                Text("Produkty", modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+
+                if (vm.products.isEmpty()) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Nie ma jeszcze produktów.", color = MmMuted)
+                    }
+                } else {
+                    LazyColumn(
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        items(vm.products, key = { it.id }) { product ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth().clickable { selectedProduct = product },
+                                border = CardDefaults.outlinedCardBorder()
+                            ) {
+                                Row(Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Outlined.Inventory2, contentDescription = null, tint = MmOrange)
+                                    Spacer(Modifier.width(12.dp))
+                                    Column(Modifier.weight(1f)) {
+                                        Text("${product.brand} ${product.name}", fontWeight = FontWeight.Bold)
+                                        Text("Rozmiar: ${product.sizes.joinToString().ifBlank { "—" }}", color = MmMuted)
+                                        if (product.productIdentifier.isNotBlank()) Text("EAN: ${product.productIdentifier}", color = MmMuted)
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
