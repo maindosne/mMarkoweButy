@@ -345,6 +345,7 @@ private fun ProductEditorScreen(vm: MainViewModel, product: Product?, onDone: ()
     var description by remember(product?.id) { mutableStateOf(product?.description ?: "") }
     var size by remember(product?.id) { mutableStateOf(product?.sizes?.firstOrNull() ?: "") }
     var price by remember(product?.id) { mutableStateOf(product?.price?.let { if (it % 1.0 == 0.0) it.toInt().toString() else it.toString() } ?: "") }
+    var oldPrice by remember(product?.id) { mutableStateOf(product?.oldPrice?.let { if (it % 1.0 == 0.0) it.toInt().toString() else it.toString() } ?: "") }
     var published by remember(product?.id) { mutableStateOf(product?.published ?: true) }
     var identifier by remember(product?.id) { mutableStateOf(product?.productIdentifier ?: "") }
     var manufacturerName by remember(product?.id) { mutableStateOf(product?.manufacturerName ?: "") }
@@ -371,7 +372,7 @@ private fun ProductEditorScreen(vm: MainViewModel, product: Product?, onDone: ()
         brand, name, description, size, price, images.toList(), published, identifier,
         manufacturerName, manufacturerAddress, manufacturerEmail,
         responsibleName, responsibleAddress, responsibleEmail, safetyInfo,
-        materialUpper, materialLining, materialSole
+        materialUpper, materialLining, materialSole, oldPrice
     )
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -414,6 +415,8 @@ private fun ProductEditorScreen(vm: MainViewModel, product: Product?, onDone: ()
             AppField("Rozmiar", size, { size = it }, Modifier.weight(1f), enabled = !sold)
             AppField("Cena (zł)", price, { price = it }, Modifier.weight(1f), enabled = !sold, keyboardType = KeyboardType.Decimal)
         }
+        AppField("Stara cena / cena przed obniżką (zł)", oldPrice, { oldPrice = it }, enabled = !sold, keyboardType = KeyboardType.Decimal)
+        Text("Opcjonalnie. Jeśli podasz wyższą cenę, klient zobaczy ją jako przekreśloną.", color = MmMuted, style = MaterialTheme.typography.bodySmall)
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) { Text("Oferta publiczna", fontWeight = FontWeight.Medium); Text("Widoczna w sklepie", color = MmMuted, style = MaterialTheme.typography.bodySmall) }
             Switch(checked = published, onCheckedChange = { published = it }, enabled = !sold)
