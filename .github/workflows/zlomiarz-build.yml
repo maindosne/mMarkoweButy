@@ -1,0 +1,45 @@
+name: Zlomiarz 0.3.0 Build
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'ci/zlomiarz-source.b64'
+      - '.github/workflows/zlomiarz-build.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Prepare Android SDK
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0" >/dev/null
+      - name: Decode project
+        run: |
+          mkdir -p /tmp/zlomiarz
+          base64 -d -i ci/zlomiarz-source.b64 > /tmp/zlomiarz.zip
+          unzip -q /tmp/zlomiarz.zip -d /tmp/zlomiarz
+          test -f /tmp/zlomiarz/app/src/main/java/pl/marek/zlomiarz/MainActivity.java
+      - name: Build unsigned release APK
+        working-directory: /tmp/zlomiarz
+        run: gradle :app:assembleRelease --no-daemon
+      - name: Collect APK and signing tools
+        run: |
+          mkdir -p /tmp/zlomiarz-out/lib
+          cp /tmp/zlomiarz/app/build/outputs/apk/release/app-release-unsigned.apk /tmp/zlomiarz-out/Zlomiarz-0.3.0-unsigned.apk
+          BT="$ANDROID_HOME/build-tools/35.0.0"
+          cp "$BT/apksigner" /tmp/zlomiarz-out/
+          cp "$BT/zipalign" /tmp/zlomiarz-out/
+          cp "$BT/lib/apksigner.jar" /tmp/zlomiarz-out/lib/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zlomiarz-0.3.0-build
+          path: /tmp/zlomiarz-out
+          if-no-files-found: error
