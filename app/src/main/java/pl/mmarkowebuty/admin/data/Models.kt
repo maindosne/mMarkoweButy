@@ -25,6 +25,7 @@ data class Product(
     val materialUpper: String,
     val materialLining: String,
     val materialSole: String,
+    val oldPrice: Double?,
 )
 
 data class ProductDraft(
@@ -46,6 +47,7 @@ data class ProductDraft(
     val materialUpper: String = "",
     val materialLining: String = "",
     val materialSole: String = "",
+    val oldPrice: String = "",
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put("brand", brand.trim())
@@ -53,6 +55,7 @@ data class ProductDraft(
         put("description", description.trim())
         put("sizes", JSONArray().put(size.trim()))
         put("price", price.replace(',', '.').toDoubleOrNull() ?: 0.0)
+        put("oldPrice", oldPrice.replace(',', '.').toDoubleOrNull())
         put("imageUrls", JSONArray(imageUrls))
         put("published", published)
         put("sold", false)
@@ -175,6 +178,7 @@ fun parseProducts(root: JSONObject): List<Product> {
                     materialUpper = o.stringOrEmpty("materialUpper"),
                     materialLining = o.stringOrEmpty("materialLining"),
                     materialSole = o.stringOrEmpty("materialSole"),
+                    oldPrice = o.optDouble("oldPrice").takeIf { o.has("oldPrice") && !o.isNull("oldPrice") },
                 )
             )
         }
