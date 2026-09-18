@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-      - 'ci/zlomiarz-source.b64'
+      - 'ci/zlomiarz-parts/**'
       - '.github/workflows/zlomiarz-build.yml'
 
 jobs:
@@ -21,22 +21,23 @@ jobs:
           gradle-version: '8.9'
       - name: Prepare Android SDK
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0" >/dev/null
-      - name: Decode project
+      - name: Reassemble project
         run: |
+          cat ci/zlomiarz-parts/part00.txt ci/zlomiarz-parts/part01.txt ci/zlomiarz-parts/part02.txt ci/zlomiarz-parts/part03.txt > /tmp/zlomiarz.b64
+          base64 -d /tmp/zlomiarz.b64 > /tmp/zlomiarz.zip
+          echo "1d3582aa86b793af04e583b316d0ec70e14d646a126a7a455552fff9ccfb4b0d  /tmp/zlomiarz.zip" | sha256sum -c -
           mkdir -p /tmp/zlomiarz
-          base64 -d -i ci/zlomiarz-source.b64 > /tmp/zlomiarz.zip
           unzip -q /tmp/zlomiarz.zip -d /tmp/zlomiarz
           test -f /tmp/zlomiarz/app/src/main/java/pl/marek/zlomiarz/MainActivity.java
       - name: Build unsigned release APK
         working-directory: /tmp/zlomiarz
         run: gradle :app:assembleRelease --no-daemon
-      - name: Collect APK and signing tools
+      - name: Align APK and collect signing tool
         run: |
           mkdir -p /tmp/zlomiarz-out/lib
-          cp /tmp/zlomiarz/app/build/outputs/apk/release/app-release-unsigned.apk /tmp/zlomiarz-out/Zlomiarz-0.3.0-unsigned.apk
           BT="$ANDROID_HOME/build-tools/35.0.0"
+          "$BT/zipalign" -f 4 /tmp/zlomiarz/app/build/outputs/apk/release/app-release-unsigned.apk /tmp/zlomiarz-out/Zlomiarz-0.3.0-aligned-unsigned.apk
           cp "$BT/apksigner" /tmp/zlomiarz-out/
-          cp "$BT/zipalign" /tmp/zlomiarz-out/
           cp "$BT/lib/apksigner.jar" /tmp/zlomiarz-out/lib/
       - uses: actions/upload-artifact@v4
         with:
