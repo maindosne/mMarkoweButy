@@ -23,7 +23,7 @@ jobs:
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0" >/dev/null
       - name: Reassemble project
         run: |
-          cat ci/zlomiarz-parts/part00.txt ci/zlomiarz-parts/part01.txt ci/zlomiarz-parts/part02.txt ci/zlomiarz-parts/part03.txt > /tmp/zlomiarz.b64
+          cat ci/zlomiarz-parts/part00.txt ci/zlomiarz-parts/part01.txt ci/zlomiarz-parts/part02.txt ci/zlomiarz-parts/part03_0.txt ci/zlomiarz-parts/part03_1.txt ci/zlomiarz-parts/part03_2.txt ci/zlomiarz-parts/part03_3.txt > /tmp/zlomiarz.b64
           base64 -d /tmp/zlomiarz.b64 > /tmp/zlomiarz.zip
           echo "1d3582aa86b793af04e583b316d0ec70e14d646a126a7a455552fff9ccfb4b0d  /tmp/zlomiarz.zip" | sha256sum -c -
           mkdir -p /tmp/zlomiarz
