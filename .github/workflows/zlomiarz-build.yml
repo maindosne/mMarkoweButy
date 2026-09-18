@@ -1,4 +1,4 @@
-name: Zlomiarz 0.3.0 Build
+name: Zlomiarz 0.3.1 Build
 
 on:
   pull_request:
@@ -29,6 +29,25 @@ jobs:
           mkdir -p /tmp/zlomiarz
           unzip -q /tmp/zlomiarz.zip -d /tmp/zlomiarz
           test -f /tmp/zlomiarz/app/src/main/java/pl/marek/zlomiarz/MainActivity.java
+      - name: Apply 0.3.1 changes
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/zlomiarz/app/src/main/java/pl/marek/zlomiarz/MainActivity.java')
+          s=p.read_text(encoding='utf-8')
+          old='''            // Trolley: finite acceleration, speed and rolling resistance instead of teleporting.\n            float desiredV=clamp((cartTarget-cart)*5.2f,-285,285);\n            float oldV=cartV;\n            float maxDv=720*dt;\n            cartV+=clamp(desiredV-cartV,-maxDv,maxDv);\n            cartV*=Math.pow(.996,dt*60);\n            cart+=cartV*dt;'''
+          new='''            // Trolley: slower travel with distance-aware braking for a smooth, heavy crane feel.\n            float dxToTarget=cartTarget-cart;\n            float maxSpeed=165f;\n            float acceleration=230f;\n            float braking=125f;\n            float brakingSpeed=(float)Math.sqrt(Math.max(0,2f*braking*Math.abs(dxToTarget)));\n            float desiredV=Math.signum(dxToTarget)*Math.min(maxSpeed,brakingSpeed);\n            float oldV=cartV;\n            boolean slowing=Math.abs(desiredV)<Math.abs(cartV) || (desiredV!=0 && Math.signum(desiredV)!=Math.signum(cartV));\n            float maxDv=(slowing?braking:acceleration)*dt;\n            cartV+=clamp(desiredV-cartV,-maxDv,maxDv);\n            cartV*=Math.pow(.9985,dt*60);\n            if(Math.abs(dxToTarget)<.5f && Math.abs(cartV)<2f)cartV=0;\n            cart+=cartV*dt;'''
+          if old not in s:
+              raise SystemExit('physics source block not found')
+          s=s.replace(old,new)
+          s=s.replace('button(primary,"PODGLĄD ZŁOMOWISKA   ›",true,0,20);','button(primary,"START   ›",true,0,20);')
+          s=s.replace('centered("0.3.0  /  FIZYKA 2D  /  OFFLINE"','centered("0.3.1  /  FIZYKA 2D  /  OFFLINE"')
+          s=s.replace('Złomiarz — wersja 0.3.0 z fizyką 2D.','Złomiarz — wersja 0.3.1 z fizyką 2D.')
+          p.write_text(s,encoding='utf-8')
+          b=Path('/tmp/zlomiarz/app/build.gradle')
+          t=b.read_text(encoding='utf-8').replace("versionCode 3","versionCode 4").replace("versionName '0.3.0'","versionName '0.3.1'")
+          b.write_text(t,encoding='utf-8')
+          PY
       - name: Build unsigned release APK
         working-directory: /tmp/zlomiarz
         run: gradle :app:assembleRelease --no-daemon
@@ -36,11 +55,11 @@ jobs:
         run: |
           mkdir -p /tmp/zlomiarz-out/lib
           BT="$ANDROID_HOME/build-tools/35.0.0"
-          "$BT/zipalign" -f 4 /tmp/zlomiarz/app/build/outputs/apk/release/app-release-unsigned.apk /tmp/zlomiarz-out/Zlomiarz-0.3.0-aligned-unsigned.apk
+          "$BT/zipalign" -f 4 /tmp/zlomiarz/app/build/outputs/apk/release/app-release-unsigned.apk /tmp/zlomiarz-out/Zlomiarz-0.3.1-aligned-unsigned.apk
           cp "$BT/apksigner" /tmp/zlomiarz-out/
           cp "$BT/lib/apksigner.jar" /tmp/zlomiarz-out/lib/
       - uses: actions/upload-artifact@v4
         with:
-          name: zlomiarz-0.3.0-build
+          name: zlomiarz-0.3.1-build
           path: /tmp/zlomiarz-out
           if-no-files-found: error
