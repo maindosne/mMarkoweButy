@@ -1,1 +1,49 @@
-<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#111111"><meta name="description" content="mMarkoweButy — pojedyncze pary markowego obuwia w konkretnych cenach."><link rel="canonical" href="https://www.mmarkowebuty.pl/"><meta property="og:title" content="mMarkoweButy — Dobre pary. Lepsze ceny."><meta property="og:description" content="Pojedyncze pary markowego obuwia, konkretne rozmiary i ceny."><meta property="og:type" content="website"><meta property="og:url" content="https://www.mmarkowebuty.pl/"><title>mMarkoweButy — Dobre pary. Lepsze ceny.</title><link rel="stylesheet" href="/styles.css"></head><body><header class="topbar"><nav class="nav"><a class="logo" href="/">mMarkowe<span>Buty</span></a><div class="navlinks"><a href="#oferty">Oferty</a></div></nav></header><main class="wrap"><div id="topNotice"></div><section class="hero"><div class="eyebrow">Pojedyncze pary • konkretne ceny</div><h1>Dobre pary.<br>Lepsze ceny.</h1><p>Każda oferta dotyczy konkretnej fizycznej pary. Widzisz jej zdjęcia, rozmiar i cenę — bez zgadywania dostępności.</p><div class="hero-badges"><span class="badge">Pojedyncze okazje</span><span class="badge">Konkretne rozmiary</span><span class="badge">Bezpieczna płatność Stripe</span></div></section><section id="oferty"><div class="section-head"><div><h2>Najnowsze oferty</h2><span>Świeżo dodane pary</span></div><span>Scrolluj i wybieraj</span></div><div id="products" class="grid"><div class="panel loading">Ładowanie ofert…</div></div></section></main><button id="cartButton" class="floating-cart">Koszyk (0)</button><div id="cartModal" class="modal"><div class="modal-box"><div class="row"><h2>Twój koszyk</h2><button id="closeCart" class="btn btn-soft">Zamknij</button></div><div id="cartItems"></div><div class="row checkout-row"><strong id="cartTotal">Razem: 0 zł</strong><button id="checkout" class="btn btn-orange">Przejdź do płatności</button></div><div class="small checkout-note">Po przejściu do płatności wybrane pary są czasowo rezerwowane. Płatność obsługuje Stripe.</div><div id="cartMessage"></div></div></div><div id="detailModal" class="modal"><div class="modal-box detail-box"><div class="row"><h2>Szczegóły produktu</h2><button class="btn btn-soft" onclick="closeDetails()">Zamknij</button></div><div id="detailBody"></div></div></div><footer class="footer"><strong>mMarkoweButy</strong><span> • </span><span>Obuwie z konkretną dostępnością i ceną</span></footer><script src="https://eufwkwksjcdzfmlaugbj.supabase.co/functions/v1/markowe-buty-assets/shop.js?v=2" defer></script></body></html>
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<meta name="description" content="mMarkoweButy — znajdź swoją parę przesuwając buty w lewo lub w prawo.">
+<link rel="canonical" href="https://www.mmarkowebuty.pl/">
+<title>mMarkoweButy — znajdź swoją parę</title>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/swipe.css">
+</head>
+<body>
+<header class="topbar"><nav class="nav"><a class="logo" href="/">mMarkowe<span>Buty</span></a><div class="navlinks"><button id="favoritesButton" class="nav-btn">❤ Ulubione <span id="favoritesCount">0</span></button><button id="catalogButton" class="nav-btn">Klasyczny sklep</button></div></nav></header>
+<main class="wrap">
+<div id="topNotice"></div>
+<section id="discoverIntro" class="discover-intro">
+ <div class="eyebrow">Nowy sposób kupowania butów</div>
+ <h1>Znajdź swoją parę.</h1>
+ <p>Powiedz nam, czego szukasz. Potem przesuwaj: w prawo zapisujesz parę, w lewo przechodzisz dalej.</p>
+ <form id="discoverForm" class="discover-form">
+  <fieldset><legend>Dla kogo szukasz?</legend><div class="choice-row">
+   <label class="choice"><input type="radio" name="audience" value="damskie" required><span>Damskie</span></label>
+   <label class="choice"><input type="radio" name="audience" value="meskie" required><span>Męskie</span></label>
+   <label class="choice"><input type="radio" name="audience" value="wszystkie" required><span>Wszystkie</span></label>
+  </div></fieldset>
+  <label class="size-label" for="shoeSize">Jaki rozmiar?</label>
+  <select id="shoeSize" required><option value="">Wybierz rozmiar</option></select>
+  <button class="start-btn" type="submit">Pokaż mi buty →</button>
+ </form>
+ <button id="introCatalogButton" class="catalog-link" type="button">Wolę klasyczny sklep</button>
+</section>
+
+<section id="swipeView" class="swipe-view" hidden>
+ <div class="swipe-head"><div><span id="filterSummary"></span><button id="changeFilters" type="button">Zmień</button></div><span id="progress"></span></div>
+ <div id="swipeDeck" class="swipe-deck"><div class="panel loading">Ładowanie par…</div></div>
+ <div class="swipe-actions"><button id="rejectButton" class="swipe-action reject" aria-label="Pomiń">✕</button><button id="undoButton" class="swipe-action undo" aria-label="Cofnij">↶</button><button id="likeButton" class="swipe-action like" aria-label="Dodaj do ulubionych">❤</button></div>
+ <p class="swipe-help">← pomiń &nbsp; • &nbsp; przesuń w prawo, aby polubić →</p>
+</section>
+
+<section id="favoritesView" class="alternate-view" hidden><div class="section-head"><div><h2>Twoje ulubione</h2><span>Pary zapisane podczas przeglądania</span></div><button class="backToSwipe btn btn-soft">Wróć</button></div><div id="favoritesGrid" class="grid"></div></section>
+<section id="catalogView" class="alternate-view" hidden><div class="section-head"><div><h2>Klasyczny sklep</h2><span>Wszystkie dostępne pary</span></div><button class="backToSwipe btn btn-soft">Wróć do przeglądania</button></div><div id="products" class="grid"><div class="panel loading">Ładowanie ofert…</div></div></section>
+</main>
+<button id="cartButton" class="floating-cart">Koszyk (0)</button>
+<div id="cartModal" class="modal"><div class="modal-box"><div class="row"><h2>Twój koszyk</h2><button id="closeCart" class="btn btn-soft">Zamknij</button></div><div id="cartItems"></div><div class="row checkout-row"><strong id="cartTotal">Razem: 0 zł</strong><button id="checkout" class="btn btn-orange">Przejdź do płatności</button></div><div class="small checkout-note">Po przejściu do płatności wybrane pary są czasowo rezerwowane. Płatność obsługuje Stripe.</div><div id="cartMessage"></div></div></div>
+<div id="detailModal" class="modal"><div class="modal-box detail-box"><div class="row"><h2>Szczegóły produktu</h2><button class="btn btn-soft" onclick="closeDetails()">Zamknij</button></div><div id="detailBody"></div></div></div>
+<footer class="footer"><strong>mMarkoweButy</strong><span> • </span><span>Przesuwaj. Wybieraj. Znajdź swoją parę.</span></footer>
+<script src="https://eufwkwksjcdzfmlaugbj.supabase.co/functions/v1/markowe-buty-assets/shop.js?v=2" defer></script>
+<script src="/swipe.js" defer></script>
+</body></html>
