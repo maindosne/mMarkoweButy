@@ -1,0 +1,36 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/web/public/index.html"
+    },
+    {
+      "source": "/swipe.css",
+      "destination": "/web/public/swipe.css"
+    },
+    {
+      "source": "/swipe.js",
+      "destination": "/web/public/swipe.js"
+    },
+    {
+      "source": "/styles.css",
+      "destination": "https://markowe-buty-5jozhcb41-marrkke93-2181.vercel.app/styles.css"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://markowe-buty-5jozhcb41-marrkke93-2181.vercel.app/api/:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/:path*",
+      "headers": [
+        {
+          "key": "x-vercel-enable-rewrite-caching",
+          "value": "0"
+        }
+      ]
+    }
+  ]
+}
