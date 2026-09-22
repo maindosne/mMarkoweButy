@@ -1,17 +1,65 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
-    { "source": "/", "destination": "/web/public/index.html" },
-    { "source": "/styles.css", "destination": "/web/public/styles.css" },
-    { "source": "/swipe.css", "destination": "/web/public/swipe.css" },
-    { "source": "/swipe.js", "destination": "/web/public/swipe.js" },
-    { "source": "/api/:path*", "destination": "https://eufwkwksjcdzfmlaugbj.supabase.co/functions/v1/markowe-buty/api/:path*" }
+    {
+      "source": "/sitemap.xml",
+      "destination": "https://eufwkwksjcdzfmlaugbj.supabase.co/functions/v1/mmarkowebuty-sitemap"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "https://eufwkwksjcdzfmlaugbj.supabase.co/functions/v1/mmarkowebuty-robots"
+    },
+    {
+      "source": "/merchant-feed.xml",
+      "destination": "https://eufwkwksjcdzfmlaugbj.supabase.co/functions/v1/mmarkowebuty-merchant-feed"
+    },
+    {
+      "source": "/",
+      "destination": "/web/public/index.html"
+    },
+    {
+      "source": "/styles.css",
+      "destination": "/web/public/styles.css"
+    },
+    {
+      "source": "/swipe.css",
+      "destination": "/web/public/swipe.css"
+    },
+    {
+      "source": "/swipe.js",
+      "destination": "/web/public/swipe.js"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://eufwkwksjcdzfmlaugbj.supabase.co/functions/v1/markowe-buty/api/:path*"
+    }
   ],
   "headers": [
     {
       "source": "/api/:path*",
       "headers": [
-        { "key": "x-vercel-enable-rewrite-caching", "value": "0" }
+        {
+          "key": "x-vercel-enable-rewrite-caching",
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "source": "/sitemap.xml",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, s-maxage=300, stale-while-revalidate=600"
+        }
+      ]
+    },
+    {
+      "source": "/robots.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, s-maxage=300, stale-while-revalidate=600"
+        }
       ]
     }
   ]
