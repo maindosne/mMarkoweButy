@@ -32,8 +32,9 @@
    <label class="choice"><input type="radio" name="audience" value="meskie" required><span>Męskie</span></label>
    <label class="choice"><input type="radio" name="audience" value="wszystkie" required><span>Wszystkie</span></label>
   </div></fieldset>
-  <label class="size-label" for="shoeSize">Jaki rozmiar?</label>
-  <select id="shoeSize" required><option value="">Wybierz rozmiar</option></select>
+  <label class="size-label" for="shoeSize">Rozmiar <span class="optional-note">(opcjonalnie)</span></label>
+  <select id="shoeSize"><option value="">Wszystkie rozmiary</option></select>
+  <span class="size-hint">Bez wyboru pokażemy wszystkie dostępne pary.</span>
   <button class="start-btn" type="submit">Pokaż mi buty →</button>
  </form>
  <button id="introCatalogButton" class="catalog-link" type="button">Wolę klasyczny sklep</button>
