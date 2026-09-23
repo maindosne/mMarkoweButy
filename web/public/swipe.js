@@ -10,7 +10,7 @@
     JSON.parse(localStorage.getItem('mm_favorites') || '[]').map(String),
   );
   const filters = { audience: '', size: '' };
-  const motionMs = 280;
+  const motionMs = 360;
   const $ = (id) => document.getElementById(id);
   const intro = $('discoverIntro');
   const swipe = $('swipeView');
@@ -132,8 +132,11 @@
 
     const draw = () => {
       frame = 0;
-      const rotation = Math.max(-12, Math.min(12, dx / 24));
-      element.style.transform = `translate3d(${dx}px,${dy * 0.08}px,0) rotateZ(${rotation}deg)`;
+      const rotation = Math.max(-24, Math.min(24, dx / 13));
+      const progress = Math.min(1, Math.abs(dx) / Math.max(140, element.clientWidth * 0.42));
+      const scale = 1 - (0.035 * progress);
+      element.style.transform = `translate3d(${dx * 0.72}px,${dy * 0.05}px,0) rotateZ(${rotation}deg) scale(${scale})`;
+      element.style.opacity = String(1 - (0.22 * progress));
       likeStamp.style.opacity = Math.max(0, Math.min(1, dx / 100));
       nopeStamp.style.opacity = Math.max(0, Math.min(1, -dx / 100));
 
@@ -167,8 +170,9 @@
         return;
       }
 
-      element.style.transition = `transform ${motionMs}ms cubic-bezier(.2,.78,.25,1)`;
-      element.style.transform = 'translate3d(0,0,0) rotateZ(0deg)';
+      element.style.transition = `transform ${motionMs}ms cubic-bezier(.16,1,.3,1), opacity ${motionMs}ms ease-out`;
+      element.style.transform = 'translate3d(0,0,0) rotateZ(0deg) scale(1)';
+      element.style.opacity = '1';
       likeStamp.style.transition = 'opacity 180ms ease-out';
       nopeStamp.style.transition = 'opacity 180ms ease-out';
       likeStamp.style.opacity = '0';
@@ -276,7 +280,7 @@
     let finished = false;
 
     top.classList.remove('is-dragging');
-    top.style.transition = `transform ${motionMs}ms cubic-bezier(.18,.8,.25,1),opacity 220ms ease-out`;
+    top.style.transition = `transform ${motionMs}ms cubic-bezier(.16,.84,.25,1), opacity ${motionMs}ms ease-out, filter ${motionMs}ms ease-out`;
     selectedStamp.style.transition = 'opacity 120ms ease-out';
     selectedStamp.style.opacity = '1';
     if (under) {
@@ -296,8 +300,9 @@
     });
 
     requestAnimationFrame(() => {
-      top.style.transform = `translate3d(${direction * exitDistance}px,0,0) rotateZ(${direction * 15}deg)`;
+      top.style.transform = `translate3d(${direction * Math.min(exitDistance * 0.42, 360)}px,-18px,0) rotateZ(${direction * 38}deg) scale(.82)`;
       top.style.opacity = '0';
+      top.style.filter = 'blur(7px)';
     });
     window.setTimeout(finish, motionMs + 90);
   }
