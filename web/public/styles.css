@@ -13,3 +13,9 @@
   cursor: pointer;
 }
 .remove-favorite-btn:active { transform: scale(.98); }
+
+
+.shipping-progress{max-width:1180px;margin:10px auto 18px;padding:11px 14px;border-radius:14px;background:#fff;border:1px solid #e7e7e7;font-weight:750;font-size:14px;box-shadow:0 5px 18px rgba(0,0,0,.05)}
+.shipping-progress-track{height:7px;margin-top:8px;background:#ececec;border-radius:999px;overflow:hidden}
+.shipping-progress-bar{width:0;height:100%;background:#f28c00;border-radius:999px;transition:width .35s cubic-bezier(.2,.8,.2,1)}
+@media(max-width:700px){.shipping-progress{margin:8px 12px 15px;font-size:13px}}
