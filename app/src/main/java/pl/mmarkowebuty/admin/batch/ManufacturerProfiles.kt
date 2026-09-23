@@ -28,11 +28,25 @@ object ManufacturerProfiles {
             manufacturerEmail = "",
         ),
         ManufacturerProfile(
+            brand = "Camo",
+            manufacturerName = "LECAMO s.r.o.",
+            manufacturerAddress = "Hrušovská 323/19, 102 00 Praha 10 – Štěrboholy, Czechy",
+            manufacturerEmail = "",
+        ),
+        ManufacturerProfile(
             brand = "SuperIn",
             manufacturerName = "Lam Ng Chung",
             manufacturerAddress = "Symfonická 1426/5, 150 00 Praha 5 – Stodůlky, Czechy",
             manufacturerEmail = "",
         ),
+        ManufacturerProfile(
+            brand = "Bellamila",
+            manufacturerName = "Roman Sucholas – Firma Handlowa",
+            manufacturerAddress = "Zielona Góra, Polska",
+            manufacturerEmail = "",
+        ),
+        ManufacturerProfile(brand = "Minke", manufacturerName = "", manufacturerAddress = "", manufacturerEmail = ""),
+        ManufacturerProfile(brand = "Sports", manufacturerName = "", manufacturerAddress = "", manufacturerEmail = ""),
     )
 
     fun find(brand: String): ManufacturerProfile? =
