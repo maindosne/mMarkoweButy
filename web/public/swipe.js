@@ -47,6 +47,11 @@
       const response = await fetch('/api/products', { cache: 'no-store' });
       const data = await response.json();
       all = data.products || [];
+      // Remove stale favorites that no longer exist in the currently available catalog.
+      const availableIds = new Set(all.map((product) => String(product.id)));
+      [...favorites].forEach((id) => {
+        if (!availableIds.has(id)) favorites.delete(id);
+      });
       const sizes = [...new Set(all.flatMap((product) => product.sizes || []).map(String))]
         .sort((a, b) => parseFloat(a) - parseFloat(b));
       $('shoeSize').innerHTML = '<option value="">Wszystkie rozmiary</option>'
