@@ -322,8 +322,16 @@
     favView.hidden = false;
     const items = all.filter((product) => favorites.has(String(product.id)));
     $('favoritesGrid').innerHTML = items.length
-      ? items.map((product) => `<article class="panel"><div onclick="window.openDetails&&openDetails(${Number(product.id)})" style="cursor:pointer">${product.imageUrl ? `<img src="${esc(product.imageUrl)}" alt="" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px">` : ''}<h3>${esc([product.brand, product.name].join(' '))}</h3><strong>${price(product)}</strong><div class="favorite-note">Rozmiar ${esc((product.sizes || []).join(', '))}</div></div></article>`).join('')
+      ? items.map((product) => `<article class="panel"><div onclick="window.openDetails&&openDetails(${Number(product.id)})" style="cursor:pointer">${product.imageUrl ? `<img src="${esc(product.imageUrl)}" alt="" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px">` : ''}<h3>${esc([product.brand, product.name].join(' '))}</h3><strong>${price(product)}</strong><div class="favorite-note">Rozmiar ${esc((product.sizes || []).join(', '))}</div></div><button type="button" class="remove-favorite-btn" data-remove-favorite="${Number(product.id)}" aria-label="Usuń z ulubionych">Usuń z ulubionych ♡</button></article>`).join('')
       : '<div class="panel">Nie masz jeszcze ulubionych. Przesuń wybraną parę w prawo.</div>';
+    $('favoritesGrid').querySelectorAll('[data-remove-favorite]').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        favorites.delete(String(button.dataset.removeFavorite));
+        saveFav();
+        showFavorites();
+      });
+    });
   }
 
   function back() {
