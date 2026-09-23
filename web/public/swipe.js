@@ -23,6 +23,27 @@
     $('favoritesCount').textContent = favorites.size;
   }
 
+  function updateShippingProgress() {
+    const text = $('shippingProgressText');
+    const bar = $('shippingProgressBar');
+    if (!text || !bar) return;
+    let ids = [];
+    try { ids = JSON.parse(localStorage.getItem('mmarkowebuty_cart_v2') || '[]').map(Number); } catch {}
+    const subtotal = ids
+      .map((id) => all.find((product) => Number(product.id) === id))
+      .filter(Boolean)
+      .reduce((sum, product) => sum + Number(product.price || 0), 0);
+    const target = 99;
+    const missing = Math.max(0, target - subtotal);
+    const progress = Math.min(100, Math.max(0, (subtotal / target) * 100));
+    bar.style.width = progress + '%';
+    text.textContent = subtotal <= 0
+      ? 'Darmowa dostawa do Paczkomatu od 99 zł'
+      : missing > 0
+        ? `Brakuje Ci ${missing.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł do darmowej dostawy`
+        : 'Masz darmową dostawę do Paczkomatu ✓';
+  }
+
   function normalize(value) {
     return String(value || '')
       .toLowerCase()
@@ -57,6 +78,7 @@
       $('shoeSize').innerHTML = '<option value="">Wszystkie rozmiary</option>'
         + sizes.map((size) => `<option>${esc(size)}</option>`).join('');
       saveFav();
+      updateShippingProgress();
     } catch (error) {
       deck.innerHTML = '<div class="empty-deck"><div><h2>Nie udało się pobrać butów</h2><p>Spróbuj ponownie za chwilę.</p></div></div>';
     }
@@ -367,6 +389,12 @@
   $('catalogButton').onclick = showCatalog;
   $('introCatalogButton').onclick = showCatalog;
   $('favoritesButton').onclick = showFavorites;
+  document.addEventListener('click', (event) => {
+    if (event.target.closest('[data-add],[data-add-details],[data-remove]')) {
+      window.setTimeout(updateShippingProgress, 30);
+    }
+  });
+  window.addEventListener('storage', updateShippingProgress);
   document.querySelectorAll('.backToSwipe').forEach((button) => {
     button.onclick = back;
   });
