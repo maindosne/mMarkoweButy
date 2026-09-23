@@ -42,10 +42,10 @@ object ManufacturerProfiles {
         ManufacturerProfile(
             brand = "Bellamila",
             manufacturerName = "Roman Sucholas – Firma Handlowa",
-            manufacturerAddress = "Zielona Góra, Polska",
+            manufacturerAddress = "ul. Obywatelska 11/2, 65-736 Zielona Góra, Polska",
             manufacturerEmail = "",
         ),
-        ManufacturerProfile(brand = "Minke", manufacturerName = "", manufacturerAddress = "", manufacturerEmail = ""),
+        ManufacturerProfile(brand = "Minke", manufacturerName = "ZION s.r.o.", manufacturerAddress = "V olšinách 3383/126a, 100 00 Praha 10 – Strašnice, Czechy", manufacturerEmail = ""),
         ManufacturerProfile(brand = "Sports", manufacturerName = "", manufacturerAddress = "", manufacturerEmail = ""),
     )
 
