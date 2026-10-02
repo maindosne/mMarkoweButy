@@ -38,6 +38,10 @@
       "destination": "/web/public/ai-chat.js"
     },
     {
+      "source": "/api/ai-chat",
+      "destination": "https://eufwkwksjcdzfmlaugbj.supabase.co/functions/v1/mmarkowebuty-ai-chat"
+    },
+    {
       "source": "/api/:path*",
       "destination": "https://eufwkwksjcdzfmlaugbj.supabase.co/functions/v1/markowe-buty/api/:path*"
     }
