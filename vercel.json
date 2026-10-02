@@ -30,6 +30,14 @@
       "destination": "/web/public/swipe.js"
     },
     {
+      "source": "/ai-chat.css",
+      "destination": "/web/public/ai-chat.css"
+    },
+    {
+      "source": "/ai-chat.js",
+      "destination": "/web/public/ai-chat.js"
+    },
+    {
       "source": "/api/:path*",
       "destination": "https://eufwkwksjcdzfmlaugbj.supabase.co/functions/v1/markowe-buty/api/:path*"
     }
@@ -80,4 +88,4 @@
       ]
     }
   ]
-}
+}\n
