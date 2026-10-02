@@ -38,6 +38,14 @@
       "destination": "/web/public/ai-chat.js"
     },
     {
+      "source": "/store-luxury.js",
+      "destination": "/web/public/store-luxury.js"
+    },
+    {
+      "source": "/store-luxury.css",
+      "destination": "/web/public/store-luxury.css"
+    },
+    {
       "source": "/api/ai-chat",
       "destination": "https://eufwkwksjcdzfmlaugbj.supabase.co/functions/v1/mmarkowebuty-ai-chat"
     },
