@@ -1,8 +1,9 @@
 <!doctype html>
 <html lang="pl">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#111111">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050606">
 <meta name="description" content="Pojedyncze pary markowego obuwia w konkretnych rozmiarach i cenach. Bezpieczna płatność online i dostawa InPost Paczkomat.">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta property="og:site_name" content="mMarkoweButy">
@@ -15,50 +16,266 @@
 <link rel="sitemap" type="application/xml" href="https://www.mmarkowebuty.pl/sitemap.xml">
 <title>mMarkoweButy – markowe buty w okazjach cenowych</title>
 <script id="mm-seo-schema" type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://www.mmarkowebuty.pl/#organization","name":"mMarkoweButy","url":"https://www.mmarkowebuty.pl/"},{"@type":"WebSite","@id":"https://www.mmarkowebuty.pl/#website","url":"https://www.mmarkowebuty.pl/","name":"mMarkoweButy","publisher":{"@id":"https://www.mmarkowebuty.pl/#organization"}}]}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/swipe.css">
 <link rel="stylesheet" href="/pro-shop.css">
 <link rel="stylesheet" href="/ai-chat.css">
+<link id="luxuryTheme" rel="stylesheet" href="/store-luxury.css">
 </head>
 <body>
-<header class="topbar"><nav class="nav"><a class="logo" href="/">mMarkowe<span>Buty</span></a><div class="navlinks"><button id="favoritesButton" class="nav-btn">❤ Ulubione <span id="favoritesCount">0</span></button><button id="catalogButton" class="nav-btn">Klasyczny sklep</button></div></nav></header>
+
+<header class="topbar">
+  <nav class="nav" aria-label="Główna nawigacja">
+    <a class="logo" href="/" aria-label="mMarkoweButy – strona główna">mMarkowe<span>Buty</span></a>
+
+    <div class="navlinks">
+      <button class="lux-nav-link" type="button" data-lux-catalog="">Nowości</button>
+      <button class="lux-nav-link" type="button" data-lux-audience="damskie">Kobiety</button>
+      <button class="lux-nav-link" type="button" data-lux-audience="meskie">Mężczyźni</button>
+      <button class="lux-nav-link" type="button" data-lux-catalog="">Promocje</button>
+      <button id="catalogButton" class="nav-btn" type="button">Sklep</button>
+    </div>
+
+    <div class="lux-header-actions">
+      <form id="luxHeaderSearchForm" class="lux-search" role="search">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <input id="luxHeaderSearch" type="search" placeholder="Szukaj butów, marki, modelu…" autocomplete="off">
+      </form>
+      <button id="favoritesButton" class="lux-icon-btn nav-btn" type="button" aria-label="Ulubione">
+        ♡ <span id="favoritesCount">0</span>
+      </button>
+      <button id="luxHeaderCart" class="lux-icon-btn" type="button" aria-label="Otwórz koszyk">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 4.5h2l1.8 10.2h10.5l2-7.2H7.2M9.4 20a1.4 1.4 0 1 0 0-2.8 1.4 1.4 0 0 0 0 2.8ZM17 20a1.4 1.4 0 1 0 0-2.8A1.4 1.4 0 0 0 17 20Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </nav>
+</header>
+
 <main class="wrap">
-<div id="topNotice"></div>
-<div id="shippingProgress" class="shipping-progress" aria-live="polite"><div id="shippingProgressText">Darmowa dostawa od 99 zł</div><div class="shipping-progress-track"><div id="shippingProgressBar" class="shipping-progress-bar"></div></div></div>
-<section id="discoverIntro" class="discover-intro">
- <div class="eyebrow">Nowy sposób kupowania butów</div>
- <h1>Znajdź swoją parę.</h1>
- <p>Powiedz nam, czego szukasz. Potem przesuwaj: w prawo zapisujesz parę, w lewo przechodzisz dalej.</p>
- <form id="discoverForm" class="discover-form">
-  <fieldset><legend>Dla kogo szukasz?</legend><div class="choice-row">
-   <label class="choice"><input type="radio" name="audience" value="damskie" required><span>Damskie</span></label>
-   <label class="choice"><input type="radio" name="audience" value="meskie" required><span>Męskie</span></label>
-   <label class="choice"><input type="radio" name="audience" value="wszystkie" required><span>Wszystkie</span></label>
-  </div></fieldset>
-  <label class="size-label" for="shoeSize">Rozmiar <span class="optional-note">(opcjonalnie)</span></label>
-  <select id="shoeSize"><option value="">Wszystkie rozmiary</option></select>
-  <span class="size-hint">Bez wyboru pokażemy wszystkie dostępne pary.</span>
-  <button class="start-btn" type="submit">Pokaż mi buty →</button>
- </form>
- <button id="introCatalogButton" class="catalog-link" type="button">Wolę klasyczny sklep</button>
-</section>
+  <div id="topNotice"></div>
 
-<section id="swipeView" class="swipe-view" hidden>
- <div class="swipe-head"><div><span id="filterSummary"></span><button id="changeFilters" type="button">Zmień</button></div><span id="progress"></span></div>
- <div id="swipeDeck" class="swipe-deck"><div class="panel loading">Ładowanie par…</div></div>
- <div class="swipe-actions"><button id="rejectButton" class="swipe-action reject" aria-label="Pomiń">✕</button><button id="undoButton" class="swipe-action undo" aria-label="Cofnij">↶</button><button id="likeButton" class="swipe-action like" aria-label="Dodaj do ulubionych">❤</button></div>
- <p class="swipe-help">← pomiń &nbsp; • &nbsp; przesuń w prawo, aby polubić →</p>
-</section>
+  <section class="lux-hero" aria-labelledby="luxHeroTitle">
+    <div class="lux-hero-copy">
+      <div class="lux-kicker">Markowe buty • wybrane pary</div>
+      <h1 id="luxHeroTitle">Styl, który idzie z Tobą <em>każdego dnia</em></h1>
+      <p>Oryginalne modele w pojedynczych parach. Wybieraj spokojnie, zapisuj ulubione i znajdź model, który naprawdę pasuje do Twojego stylu.</p>
 
-<section id="favoritesView" class="alternate-view" hidden><div class="section-head"><div><h2>Twoje ulubione</h2><span>Pary zapisane podczas przeglądania</span></div><button class="backToSwipe btn btn-soft">Wróć</button></div><div id="favoritesGrid" class="grid"></div></section>
-<section id="catalogView" class="alternate-view" hidden><div class="section-head"><div><h2>Klasyczny sklep</h2><span>Wszystkie dostępne pary</span></div><button class="backToSwipe btn btn-soft">Wróć do przeglądania</button></div><div id="products" class="grid"><div class="panel loading">Ładowanie ofert…</div></div></section>
+      <div class="lux-hero-trust" aria-label="Najważniejsze zalety sklepu">
+        <span>
+          <svg viewBox="0 0 24 24" fill="none"><path d="m12 3 7 4v5c0 4.5-3 7.4-7 9-4-1.6-7-4.5-7-9V7l7-4Z" stroke="currentColor" stroke-width="1.6"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Sprawdzone oferty
+        </span>
+        <span>
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 7h11v9H3zM14 10h3l3 3v3h-6z" stroke="currentColor" stroke-width="1.6"/><circle cx="7" cy="18" r="1.5" stroke="currentColor" stroke-width="1.6"/><circle cx="17" cy="18" r="1.5" stroke="currentColor" stroke-width="1.6"/></svg>
+          Szybka dostawa
+        </span>
+        <span>
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 7h14v12H5zM8 7a4 4 0 0 1 8 0" stroke="currentColor" stroke-width="1.6"/></svg>
+          Darmowa od 99 zł
+        </span>
+      </div>
+
+      <div class="lux-hero-actions">
+        <button class="lux-cta primary" type="button" data-lux-catalog="">Zobacz nowości <span>→</span></button>
+        <button id="luxFindPair" class="lux-cta" type="button">Znajdź swoją parę</button>
+      </div>
+    </div>
+
+    <div class="lux-hero-visual" aria-label="Polecany produkt">
+      <div class="lux-hero-product">
+        <img id="luxHeroImage" alt="">
+      </div>
+      <div class="lux-hero-label"><span>Moda</span><span>Jakość</span><span>Wybrane</span><span>Marki</span></div>
+      <div id="luxHeroMeta" class="lux-hero-product-meta"><span>Polecana para</span><strong>Ładowanie…</strong></div>
+    </div>
+  </section>
+
+  <div id="shippingProgress" class="shipping-progress" aria-live="polite">
+    <div id="shippingProgressText">Darmowa dostawa od 99 zł</div>
+    <div class="shipping-progress-track"><div id="shippingProgressBar" class="shipping-progress-bar"></div></div>
+  </div>
+
+  <section class="lux-section" aria-labelledby="categoriesTitle">
+    <div class="lux-section-head">
+      <div>
+        <div class="lux-section-kicker">Popularne kategorie</div>
+        <h2 id="categoriesTitle" class="lux-section-title">Wybierz <em>swój styl</em></h2>
+      </div>
+      <button class="lux-link" type="button" data-lux-catalog="">Zobacz wszystkie kategorie <span>→</span></button>
+    </div>
+
+    <div class="lux-category-grid">
+      <button class="lux-category-card" type="button" data-lux-audience="damskie">
+        <img id="luxCategoryWomenImg" alt="" loading="lazy">
+        <span class="lux-category-copy"><strong>Kobiety</strong><span>Zobacz kolekcję →</span></span>
+      </button>
+      <button class="lux-category-card" type="button" data-lux-audience="meskie">
+        <img id="luxCategoryMenImg" alt="" loading="lazy">
+        <span class="lux-category-copy"><strong>Mężczyźni</strong><span>Zobacz kolekcję →</span></span>
+      </button>
+      <button class="lux-category-card" type="button" data-lux-catalog="">
+        <img id="luxCategoryNewImg" alt="" loading="lazy">
+        <span class="lux-category-copy"><strong>Nowości</strong><span>Zobacz kolekcję →</span></span>
+      </button>
+      <button class="lux-category-card promo" type="button" data-lux-catalog="">
+        <img id="luxCategoryPromoImg" alt="" loading="lazy">
+        <span class="lux-category-copy"><strong>Promocje</strong><span>Sprawdź oferty →</span></span>
+      </button>
+    </div>
+  </section>
+
+  <section class="lux-section" aria-labelledby="featuredTitle">
+    <div class="lux-section-head">
+      <div>
+        <div class="lux-section-kicker">Polecane teraz</div>
+        <h2 id="featuredTitle" class="lux-section-title">Najczęściej <em>wybierane</em></h2>
+      </div>
+      <button id="luxBrowseAll" class="lux-link" type="button">Zobacz wszystkie produkty <span>→</span></button>
+    </div>
+    <div id="luxFeaturedProducts" class="lux-featured-grid">
+      <div class="panel loading">Ładowanie aktualnych ofert…</div>
+    </div>
+  </section>
+
+  <section class="lux-benefits" aria-label="Korzyści zakupów">
+    <div class="lux-benefits-inner">
+      <div class="lux-benefit">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M3 7h11v9H3zM14 10h3l3 3v3h-6z" stroke="currentColor" stroke-width="1.6"/><circle cx="7" cy="18" r="1.5" stroke="currentColor" stroke-width="1.6"/><circle cx="17" cy="18" r="1.5" stroke="currentColor" stroke-width="1.6"/></svg>
+        <div><strong>Szybka wysyłka</strong><span>Zamówienie sprawnie trafia do realizacji.</span></div>
+      </div>
+      <div class="lux-benefit">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 9h16v11H4zM12 9v11M3 6h18v3H3zM12 6H8.5C7.1 6 6 5.1 6 4s.9-2 2-2c2 0 4 4 4 4Zm0 0h3.5C16.9 6 18 5.1 18 4s-.9-2-2-2c-2 0-4 4-4 4Z" stroke="currentColor" stroke-width="1.5"/></svg>
+        <div><strong>Darmowa dostawa od 99 zł</strong><span>Do Paczkomatu InPost na terenie Polski.</span></div>
+      </div>
+      <div class="lux-benefit">
+        <svg viewBox="0 0 24 24" fill="none"><path d="m4 8 8-4 8 4-8 4-8-4Zm0 0v8l8 4 8-4V8M12 12v8" stroke="currentColor" stroke-width="1.5"/></svg>
+        <div><strong>Wygodne zakupy</strong><span>Szczegóły produktu i rozmiaru zawsze pod ręką.</span></div>
+      </div>
+      <div class="lux-benefit">
+        <svg viewBox="0 0 24 24" fill="none"><path d="m12 3 7 4v5c0 4.5-3 7.4-7 9-4-1.6-7-4.5-7-9V7l7-4Z" stroke="currentColor" stroke-width="1.6"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div><strong>Bezpieczna płatność</strong><span>Płatności online obsługiwane przez Stripe.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="discoverIntro" class="discover-intro">
+    <div class="eyebrow">Dobierz ofertę po swojemu</div>
+    <h1>Znajdź swoją parę.</h1>
+    <p>Wybierz, czego szukasz, a potem przesuwaj dostępne pary. W prawo zapisujesz ulubione, w lewo przechodzisz dalej.</p>
+    <form id="discoverForm" class="discover-form">
+      <fieldset>
+        <legend>Dla kogo szukasz?</legend>
+        <div class="choice-row">
+          <label class="choice"><input type="radio" name="audience" value="damskie" required><span>Damskie</span></label>
+          <label class="choice"><input type="radio" name="audience" value="meskie" required><span>Męskie</span></label>
+          <label class="choice"><input type="radio" name="audience" value="wszystkie" required><span>Wszystkie</span></label>
+        </div>
+      </fieldset>
+      <label class="size-label" for="shoeSize">Rozmiar <span class="optional-note">(opcjonalnie)</span></label>
+      <select id="shoeSize"><option value="">Wszystkie rozmiary</option></select>
+      <span class="size-hint">Bez wyboru pokażemy wszystkie dostępne pary.</span>
+      <button class="start-btn" type="submit">Pokaż mi buty →</button>
+    </form>
+    <button id="introCatalogButton" class="catalog-link" type="button">Wolę klasyczny sklep</button>
+  </section>
+
+  <section id="swipeView" class="swipe-view" hidden>
+    <div class="swipe-head"><div><span id="filterSummary"></span><button id="changeFilters" type="button">Zmień</button></div><span id="progress"></span></div>
+    <div id="swipeDeck" class="swipe-deck"><div class="panel loading">Ładowanie par…</div></div>
+    <div class="swipe-actions">
+      <button id="rejectButton" class="swipe-action reject" aria-label="Pomiń">✕</button>
+      <button id="undoButton" class="swipe-action undo" aria-label="Cofnij">↶</button>
+      <button id="likeButton" class="swipe-action like" aria-label="Dodaj do ulubionych">❤</button>
+    </div>
+    <p class="swipe-help">← pomiń &nbsp; • &nbsp; przesuń w prawo, aby polubić →</p>
+  </section>
+
+  <section id="favoritesView" class="alternate-view" hidden>
+    <div class="section-head"><div><h2>Twoje ulubione</h2><span>Pary zapisane podczas przeglądania</span></div><button class="backToSwipe btn btn-soft">Wróć</button></div>
+    <div id="favoritesGrid" class="grid"></div>
+  </section>
+
+  <section id="catalogView" class="alternate-view" hidden>
+    <div class="section-head"><div><h2>Klasyczny sklep</h2><span>Wszystkie dostępne pary</span></div><button class="backToSwipe btn btn-soft">Wróć do przeglądania</button></div>
+    <div id="products" class="grid"><div class="panel loading">Ładowanie ofert…</div></div>
+  </section>
+
+  <section class="lux-newsletter" aria-labelledby="luxStayTitle">
+    <div>
+      <div class="lux-section-kicker">Twój styl • Twój wybór</div>
+      <h2 id="luxStayTitle">Znajdź coś <em>dla siebie</em></h2>
+      <p>Przejrzyj wszystkie dostępne pary albo pozwól, żeby tryb przesuwania pomógł Ci zawęzić wybór.</p>
+    </div>
+    <div class="lux-newsletter-actions">
+      <button id="luxNewsletterBrowse" class="lux-cta primary" type="button">Zobacz sklep →</button>
+      <button id="luxNewsletterPair" class="lux-cta" type="button">Znajdź parę</button>
+    </div>
+  </section>
 </main>
+
 <button id="cartButton" class="floating-cart">Koszyk (0)</button>
-<div id="cartModal" class="modal"><div class="modal-box"><div class="row"><h2>Twój koszyk</h2><button id="closeCart" class="btn btn-soft">Zamknij</button></div><div id="cartItems"></div><div class="row checkout-row"><strong id="cartTotal">Razem: 0 zł</strong><button id="checkout" class="btn btn-orange">Przejdź do płatności</button></div><div class="small checkout-note">Po przejściu do płatności wybrane pary są czasowo rezerwowane. Płatność obsługuje Stripe.</div><div id="cartMessage"></div></div></div>
-<div id="detailModal" class="modal"><div class="modal-box detail-box"><div class="row"><h2>Szczegóły produktu</h2><button class="btn btn-soft" onclick="closeDetails()">Zamknij</button></div><div id="detailBody"></div></div></div>
-<footer class="footer"><strong>mMarkoweButy</strong><span> • </span><span>Przesuwaj. Wybieraj. Znajdź swoją parę.</span></footer>
+
+<div id="cartModal" class="modal">
+  <div class="modal-box">
+    <div class="row"><h2>Twój koszyk</h2><button id="closeCart" class="btn btn-soft">Zamknij</button></div>
+    <div id="cartItems"></div>
+    <div class="row checkout-row"><strong id="cartTotal">Razem: 0 zł</strong><button id="checkout" class="btn btn-orange">Przejdź do płatności</button></div>
+    <div class="small checkout-note">Po przejściu do płatności wybrane pary są czasowo rezerwowane. Płatność obsługuje Stripe.</div>
+    <div id="cartMessage"></div>
+  </div>
+</div>
+
+<div id="detailModal" class="modal">
+  <div class="modal-box detail-box">
+    <div class="row"><h2>Szczegóły produktu</h2><button class="btn btn-soft" onclick="closeDetails()">Zamknij</button></div>
+    <div id="detailBody"></div>
+  </div>
+</div>
+
+<footer class="lux-footer">
+  <div class="lux-footer-grid">
+    <div class="lux-footer-brand">
+      <a class="lux-wordmark" href="/" aria-label="mMarkoweButy">
+        <span class="word-top">MMARKOWE</span>
+        <span class="word-bottom">BUTY</span>
+      </a>
+      <p>Wybrane pary markowego obuwia. Nowoczesny sposób przeglądania, bezpieczne zakupy i dostawa do Paczkomatu.</p>
+    </div>
+    <div>
+      <h3>Zakupy</h3>
+      <button type="button" data-lux-catalog="">Nowości</button>
+      <button type="button" data-lux-audience="damskie">Kobiety</button>
+      <button type="button" data-lux-audience="meskie">Mężczyźni</button>
+      <button type="button" data-lux-catalog="">Wszystkie produkty</button>
+    </div>
+    <div>
+      <h3>Obsługa klienta</h3>
+      <a href="mailto:kontakt@mmarkowebuty.pl">Kontakt</a>
+      <button type="button" onclick="document.querySelector('.mm-ai-launcher')?.click()">Pomoc online</button>
+      <button type="button" id="luxFooterCart">Koszyk</button>
+    </div>
+    <div>
+      <h3>Sklep</h3>
+      <a href="/">mMarkoweButy.pl</a>
+      <span style="display:block;color:#777d75;font-size:10px;line-height:1.7">InPost Paczkomat<br>Stripe<br>Darmowa dostawa od 99 zł</span>
+    </div>
+  </div>
+  <div class="lux-footer-bottom">
+    <span>© 2026 mmarkowebuty.pl. Wszelkie prawa zastrzeżone.</span>
+    <span>Bezpieczne zakupy • InPost • Stripe</span>
+  </div>
+</footer>
+
 <script src="https://eufwkwksjcdzfmlaugbj.supabase.co/functions/v1/markowe-buty-assets/shop.js?v=2" defer></script>
 <script src="/swipe.js" defer></script>
 <script src="/pro-shop.js" defer></script>
 <script src="/ai-chat.js" defer></script>
-</body></html>
+<script src="/store-luxury.js" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{document.getElementById('luxFooterCart')?.addEventListener('click',()=>document.getElementById('cartButton')?.click())});
+</script>
+</body>
+</html>
