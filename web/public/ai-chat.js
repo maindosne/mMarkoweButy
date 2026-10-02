@@ -5,16 +5,37 @@
   window.__mmAiSupportChatLoaded = true;
 
   const API_URL = '/api/ai-chat';
+  const CLIENT_KEY = 'mm_ai_support_client_v1';
+  const CONVERSATION_KEY = 'mm_ai_support_conversation_v1';
   const HISTORY_KEY = 'mm_ai_support_history_v1';
   const MAX_HISTORY = 10;
 
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[char]));
+
+  const makeClientId = () => {
+    if (crypto.randomUUID) return crypto.randomUUID();
+    return Array.from(crypto.getRandomValues(new Uint8Array(24)), (b) => b.toString(16).padStart(2, '0')).join('');
+  };
+
+  let clientId = localStorage.getItem(CLIENT_KEY) || '';
+  if (!/^[a-zA-Z0-9_-]{20,100}$/.test(clientId)) {
+    clientId = makeClientId();
+    localStorage.setItem(CLIENT_KEY, clientId);
+  }
+
+  let conversationId = localStorage.getItem(CONVERSATION_KEY) || '';
+  let remoteHistoryLoaded = false;
+  let busy = false;
+  let history = [];
+
+  try {
+    const stored = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    history = Array.isArray(stored) ? stored.slice(-MAX_HISTORY) : [];
+  } catch {
+    history = [];
+  }
 
   const launcher = document.createElement('button');
   launcher.type = 'button';
@@ -38,7 +59,7 @@
       <div class="mm-ai-chat-avatar" aria-hidden="true">m</div>
       <div class="mm-ai-chat-title">
         <strong>Pomoc mMarkoweButy</strong>
-        <span><i aria-hidden="true"></i> Asystent online</span>
+        <span><i aria-hidden="true"></i> Pomoc online</span>
       </div>
       <button class="mm-ai-chat-close" type="button" aria-label="Zamknij czat">×</button>
     </header>
@@ -61,7 +82,7 @@
         <textarea rows="1" maxlength="1200" placeholder="Napisz, w czym pomóc…" aria-label="Wiadomość do asystenta"></textarea>
         <button class="mm-ai-chat-send" type="submit" aria-label="Wyślij wiadomość">➜</button>
       </form>
-      <div class="mm-ai-chat-safety">AI może się pomylić. Nie podawaj haseł ani danych karty.</div>
+      <div class="mm-ai-chat-safety">Rozmawiasz z asystentem. Nie podawaj haseł ani danych karty.</div>
     </footer>
   `;
 
@@ -75,19 +96,9 @@
   const closeButton = panel.querySelector('.mm-ai-chat-close');
   const statusDot = launcher.querySelector('.mm-ai-launcher-dot');
 
-  let busy = false;
-  let history = [];
-
-  try {
-    const stored = JSON.parse(sessionStorage.getItem(HISTORY_KEY) || '[]');
-    history = Array.isArray(stored) ? stored.slice(-MAX_HISTORY) : [];
-  } catch {
-    history = [];
-  }
-
   function saveHistory() {
     try {
-      sessionStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(-MAX_HISTORY)));
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(-MAX_HISTORY)));
     } catch {}
   }
 
@@ -118,16 +129,56 @@
     history.forEach((message) => addMessage(message.role, message.content));
   }
 
-  function setOpen(open) {
+  async function loadRemoteHistory() {
+    if (!conversationId || remoteHistoryLoaded) return;
+    remoteHistoryLoaded = true;
+
+    try {
+      const params = new URLSearchParams({
+        action: 'history',
+        clientId,
+        conversationId
+      });
+      const response = await fetch(`${API_URL}?${params.toString()}`, { cache: 'no-store' });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !Array.isArray(data.messages) || !data.messages.length) return;
+
+      history = data.messages
+        .filter((message) => ['customer', 'assistant', 'human'].includes(message.role))
+        .map((message) => ({
+          role: message.role === 'customer' ? 'user' : 'assistant',
+          content: String(message.content || '')
+        }))
+        .filter((message) => message.content)
+        .slice(-MAX_HISTORY);
+
+      saveHistory();
+      renderHistory();
+    } catch {}
+  }
+
+  async function setOpen(open) {
     panel.classList.toggle('open', open);
     launcher.setAttribute('aria-expanded', String(open));
     statusDot.hidden = open;
-    if (open) setTimeout(() => input.focus(), 60);
+    if (open) {
+      await loadRemoteHistory();
+      setTimeout(() => input.focus(), 60);
+    }
   }
 
   function resizeInput() {
     input.style.height = 'auto';
     input.style.height = Math.min(input.scrollHeight, 110) + 'px';
+  }
+
+  function pageContext() {
+    const detail = document.querySelector('#detailModal.open #detailBody');
+    return {
+      page: location.pathname + location.search,
+      title: document.title,
+      visibleProduct: detail ? String(detail.innerText || '').slice(0, 1200) : null
+    };
   }
 
   async function ask(text) {
@@ -137,14 +188,13 @@
     busy = true;
     sendButton.disabled = true;
 
-    const priorHistory = history.slice(-8);
     addMessage('user', text);
     history.push({ role: 'user', content: text });
+    history = history.slice(-MAX_HISTORY);
     saveHistory();
 
     input.value = '';
     resizeInput();
-
     const typing = addTyping();
 
     try {
@@ -152,8 +202,10 @@
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
+          clientId,
+          conversationId: conversationId || null,
           message: text,
-          history: priorHistory
+          context: pageContext()
         })
       });
 
@@ -163,6 +215,12 @@
       if (!response.ok || !data.reply) {
         addMessage('assistant', data.error || 'Czat ma chwilowy problem. Spróbuj ponownie za moment.', true);
         return;
+      }
+
+      if (data.conversationId && data.conversationId !== conversationId) {
+        conversationId = String(data.conversationId);
+        localStorage.setItem(CONVERSATION_KEY, conversationId);
+        remoteHistoryLoaded = true;
       }
 
       const reply = String(data.reply).trim();
