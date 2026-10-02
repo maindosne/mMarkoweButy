@@ -4,7 +4,7 @@
   if (window.__mmAiSupportChatLoaded) return;
   window.__mmAiSupportChatLoaded = true;
 
-  const API_URL = 'https://eufwkwksjcdzfmlaugbj.supabase.co/functions/v1/mmarkowebuty-ai-chat';
+  const API_URL = '/api/ai-chat';
   const HISTORY_KEY = 'mm_ai_support_history_v1';
   const MAX_HISTORY = 10;
 
