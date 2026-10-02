@@ -12,7 +12,7 @@
 
   function bringThemeToFront() {
     const link = document.getElementById('luxuryTheme');
-    if (link) document.head.appendChild(link);
+    if (link && document.head.lastElementChild !== link) document.head.appendChild(link);
   }
 
   function preferredWomen(list) {
@@ -105,6 +105,12 @@
     const radio = document.querySelector('input[name="audience"][value="' + value + '"]');
     const section = $('#discoverIntro');
     if (radio) radio.checked = true;
+    const swipe = $('#swipeView');
+    const catalog = $('#catalogView');
+    const favorites = $('#favoritesView');
+    if (swipe) swipe.hidden = true;
+    if (catalog) catalog.hidden = true;
+    if (favorites) favorites.hidden = true;
     if (section) {
       section.hidden = false;
       section.scrollIntoView({ behavior: 'smooth', block: 'start' });
